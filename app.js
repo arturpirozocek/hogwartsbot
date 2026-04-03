@@ -2,763 +2,681 @@ const tg = window.Telegram?.WebApp;
 if (tg) {
   tg.ready();
   tg.expand();
-  tg.enableClosingConfirmation();
 }
 
-const staffDirectory = [
-  { username: 'Demianovich', name: 'Демьян', role: 'admin_tech', title: 'Админ (технические вопросы)' },
-  { username: 'Ananasik_ya', name: 'Анастасия', role: 'admin_edu', title: 'Админ (вопросы обучения)' },
-  { username: 'sof_russo', name: 'Софа', role: 'dean_gryffindor', title: 'Декан Гриффиндора' },
-  { username: 'cirquel', name: 'Апепя', role: 'dean_ravenclaw', title: 'Декан Когтеврана' },
-  { username: 'kbaylife', name: 'Карина', role: 'dean_hufflepuff', title: 'Декан Пуффендуя' },
-  { username: 'nikatinka_me', name: 'Ника', role: 'dean_slytherin', title: 'Декан Слизерина' },
-  { username: 'nikatinka_me', name: 'Ника', role: 'quiz_master', title: 'Магистр викторин' },
-  { username: 'StSatanDay', name: 'Мистер Филч', role: 'caretaker', title: 'Завхоз' },
-  { username: 'Pandadrag', name: 'Эларион', role: 'teacher', title: 'Преподаватель / Староста Гриффиндора' },
-  { username: 'Buna72', name: 'Проф. Таун', role: 'teacher', title: 'Преподаватель травологии' },
-  { username: 'Olesionokc', name: 'Ир. Селестин Морвей', role: 'teacher', title: 'Преподаватель прорицаний' },
-  { username: 'snepulik', name: 'Профессор Снейп', role: 'teacher', title: 'Преподаватель зельеварения' },
-  { username: 'lenka_dm', name: 'Профессор Флитвик', role: 'teacher', title: 'Преподаватель заклинаний' },
-  { username: 'Severus9969', name: 'Профессор', role: 'teacher', title: 'Преподаватель ЗоТИ' },
-  { username: 'Lune474', name: 'Серафина Свитч', role: 'teacher', title: 'Преподаватель трансфигурации / факультативов' },
-  { username: 'KristinaTAA', name: 'Профессор Нокстер', role: 'teacher', title: 'Преподаватель древних рун' },
-  { username: 'ananasik_yar', name: 'Анастейра Гринвуд', role: 'teacher', title: 'Магическая ботаника' },
-  { username: 'Sofikoo_o', name: 'Соффи Браун', role: 'teacher', title: 'Полёты на метле' }
+const staff = [
+  { section: 'Администрация', name: 'Демьян', role: 'Админ (тех. вопросы)', username: 'Demianovich' },
+  { section: 'Администрация', name: 'Анастасия', role: 'Админ (обучение)', username: 'Ananasik_ya' },
+  { section: 'Администрация', name: 'Мистер Филч', role: 'Завхоз', username: 'StSatanDay' },
+  { section: 'Деканы', name: 'Софа', role: 'Декан Гриффиндора', username: 'sof_russo' },
+  { section: 'Деканы', name: 'Апепя', role: 'Декан Когтеврана', username: 'cirquel' },
+  { section: 'Деканы', name: 'Карина', role: 'Декан Пуффендуя', username: 'kbaylife' },
+  { section: 'Деканы', name: 'Ника', role: 'Декан Слизерина', username: 'nikatinka_me' },
+  { section: 'Деканы', name: 'Ника', role: 'Магистр викторин', username: 'nikatinka_me' },
+  { section: 'Преподаватели', name: 'Эларион', role: 'УЗМС / История магии', username: 'Pandadrag' },
+  { section: 'Преподаватели', name: 'Проф. Таун', role: 'Травология', username: 'Buna72' },
+  { section: 'Преподаватели', name: 'Профессор Снейп', role: 'Зельеварение', username: 'snepulik' },
+  { section: 'Преподаватели', name: 'Профессор Флитвик', role: 'Заклинания', username: 'lenka_dm' },
+  { section: 'Преподаватели', name: 'Серафина Свитч', role: 'Трансфигурация', username: 'Lune474' }
 ];
 
-const PERMISSIONS = {
-  student: ['view_content', 'submit_gazette', 'toggle_notifications'],
-  teacher: ['view_content', 'edit_lessons', 'manage_points', 'submit_gazette', 'toggle_notifications'],
-  admin_tech: ['all'],
-  admin_edu: ['all'],
-  dean_gryffindor: ['all'],
-  dean_ravenclaw: ['all'],
-  dean_hufflepuff: ['all'],
-  dean_slytherin: ['all'],
-  caretaker: ['view_content'],
-  quiz_master: ['manage_quizzes', 'submit_gazette']
+const roleMatrix = {
+  student: ['read'],
+  teacher: ['read', 'lessons:edit', 'points:edit', 'gazette:publish'],
+  admin: ['*']
 };
 
-const HOUSE_LIST = [
-  { id: 'gryffindor', name: 'Гриффиндор', color: '#a92f2f', points: 1250, crest: '🦁' },
-  { id: 'slytherin', name: 'Слизерин', color: '#1f7a47', points: 1180, crest: '🐍' },
-  { id: 'ravenclaw', name: 'Когтевран', color: '#255b91', points: 1225, crest: '🦅' },
-  { id: 'hufflepuff', name: 'Пуффендуй', color: '#9a7d1f', points: 1205, crest: '🦡' }
-];
-
-const RULES = [
-  { title: '1. Уважение и RP-этика', text: 'Оскорбления, токсичность, унижения, травля и деанон запрещены. Играем в атмосферную ролевую, а не в конфликт ради конфликта.' },
-  { title: '2. Посещаемость и активность', text: 'Если вы записались на урок/ивент, постарайтесь прийти. Если не можете — предупредите заранее преподавателя или администратора.' },
-  { title: '3. Использование магии', text: 'Запрещены действия, ломаюшие баланс: авто-победы, неуязвимость, игнор последствий. Заклинания изучаются постепенно.' },
-  { title: '4. Ролевая логика', text: 'Любое важное действие должно быть обосновано в рамках лора. Без метагейма, годмода и резких «телепортов сюжета».' },
-  { title: '5. Внутришкольная дисциплина', text: 'Соблюдайте расписание, правила факультетов, уважайте решения преподавателей и деканов.' },
-  { title: '6. Медиа и сплетник', text: 'Материалы газеты публикуются администрацией/разрешёнными авторами. Фейки и клевета без разбирательства запрещены.' },
-  { title: '7. Вакансии', text: 'По вакансиям обращение к администратору Анастасии. При отсутствии мест кандидатура добавляется в лист ожидания.' }
-];
-
-const STAFF_SECTIONS = {
-  'Администрация и деканы': [
-    'Демьян — Админ (технические вопросы) — @Demianovich',
-    'Анастасия — Админ (обучение) — @Ananasik_ya',
-    'Софа — Декан Гриффиндора — @sof_russo',
-    'Апепя — Декан Когтеврана — @cirquel',
-    'Карина — Декан Пуффендуя — @kbaylife',
-    'Ника — Декан Слизерина — @nikatinka_me',
-    'Ника — Магистр викторин — @nikatinka_me',
-    'Мистер Филч — Завхоз — @StSatanDay'
-  ],
-  'Преподаватели': [
-    'Эларион — УЗМС, История магии, История миров — @Pandadrag',
-    'Проф. Таун — Травология — @Buna72',
-    'Ир. Селестин Морвей — Прорицания — @Olesionokc',
-    'Профессор Снейп — Зельеварение — @snepulik',
-    'Лери / Мисс Лери, Флитвик — Заклинания — @Lerusik_lalaR / @lenka_dm',
-    'Серафина Свитч — Трансфигурация — @Lune474',
-    'Профессор Нокстер — Древние руны — @KristinaTAA',
-    'Анастейра Гринвуд — Магическая ботаника — @ananasik_yar'
-  ],
-  'Старосты и комиссии': [
-    'Эларион, Лера — Гриффиндор',
-    'Marlen — Когтевран',
-    'Дарья, Эмилия — Пуффендуй',
-    'Лиза, Элизабет — Слизерин',
-    'Комиссия по проверке викторин: @StSatanDay, @emiliaairapetyan, @Sofikoo_o, @Angela_Wuxiang'
-  ]
+const roleByUsername = {
+  demianovich: 'admin',
+  ananasik_ya: 'admin',
+  sof_russo: 'admin',
+  cirquel: 'admin',
+  kbaylife: 'admin',
+  nikatinka_me: 'admin',
+  pandadrag: 'teacher',
+  buna72: 'teacher',
+  snepulik: 'teacher',
+  lenka_dm: 'teacher',
+  lune474: 'teacher'
 };
 
-const spells = [
-  { name: 'Люмос', type: 'Свет', level: '1 курс', effect: 'Создаёт свет на конце палочки.' },
-  { name: 'Экспеллиармус', type: 'Боевые', level: '2 курс', effect: 'Выбивает палочку из рук противника.' },
-  { name: 'Протего', type: 'Защита', level: '2 курс', effect: 'Базовый защитный щит.' },
-  { name: 'Редукто', type: 'Боевые', level: '3 курс', effect: 'Разрушает цель мощным импульсом.' },
-  { name: 'Ступефай', type: 'Контроль', level: '3 курс', effect: 'Оглушает противника.' },
-  { name: 'Риддикулус', type: 'Защита', level: '3 курс', effect: 'Ослабляет боггарта смехом.' },
-  { name: 'Эпискей', type: 'Целительство', level: '4 курс', effect: 'Заживляет несложные травмы.' }
+const initialRules = [
+  { title: 'Атмосфера и уважение', body: 'Хогвартс — ролевая школа. Соблюдайте уважение к участникам, не мешайте чужим сюжетам и не нарушайте границы игроков.' },
+  { title: 'Учебный процесс', body: 'Уроки ведутся по курсам 1–7. Расписание заполняют преподаватели и администрация.' },
+  { title: 'Магия в RP', body: 'Заклинания применяются по уровню персонажа: сначала теория, затем практика. Опасные ритуалы запрещены без допуска администрации.' },
+  { title: 'Еженедельный сплетник', body: 'Главный выпуск выходит по воскресеньям, дополнительные материалы — в течение недели. Студенты отправляют материалы в редакцию.' },
+  { title: 'Библиотека', body: 'Книги оформлены в стиле пергаментных томов: заклинания, зелья, существа, предметы, история и сказки.' }
 ];
 
-const potions = [
-  { name: 'Феликс Фелицис', difficulty: 'Очень сложно', effect: 'Кратковременная удача.', recipe: 'Златоглазка, настойка чабреца, яйцо ашвиндера.' },
-  { name: 'Оборотное зелье', difficulty: 'Сложно', effect: 'Временная смена внешности.', recipe: 'Кружевница, пиявки, рог двурога, шерсть нужного человека.' },
-  { name: 'Костерост', difficulty: 'Средне', effect: 'Восстановление костей.', recipe: 'Экстракт скелегро-травы, настой белладонны.' },
-  { name: 'Животворящий эликсир', difficulty: 'Средне', effect: 'Возвращает силы после истощения.', recipe: 'Мята, лунная вода, капля слизи флоббер-червя.' }
+const LIBRARY_SECTIONS = [
+  { id: 'all', label: 'Все разделы' },
+  { id: 'spells', label: 'Заклинания' },
+  { id: 'potions', label: 'Зелья' },
+  { id: 'creatures', label: 'Существа' },
+  { id: 'items', label: 'Волшебные предметы' },
+  { id: 'subjects', label: 'Учебные предметы' },
+  { id: 'history', label: 'История' },
+  { id: 'tales', label: 'Сказки и рассказы' }
 ];
 
-const creatures = [
-  { name: 'Нюхль', danger: 'Низкая', description: 'Любит блестящие вещи и ворует монеты.', image: 'https://images.unsplash.com/photo-1517423440428-a5a00ad493e8?auto=format&fit=crop&w=900&q=80' },
-  { name: 'Гиппогриф', danger: 'Средняя', description: 'Благороден, требует уважения при контакте.', image: 'https://images.unsplash.com/photo-1474511320723-9a56873867b5?auto=format&fit=crop&w=900&q=80' },
-  { name: 'Дементор', danger: 'Критическая', description: 'Питается радостью, вызывает отчаяние.', image: 'https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=900&q=80' },
-  { name: 'Фестрал', danger: 'Низкая', description: 'Виден только тем, кто видел смерть.', image: 'https://images.unsplash.com/photo-1497206365907-f5e630693df0?auto=format&fit=crop&w=900&q=80' }
-];
-
-const baseBookThemes = [
-  ['Заклинания', 'Книга заклинаний', 'Филиус Флитвик'],
-  ['Зелья', 'Справочник зельеварения', 'Северус Снейп'],
-  ['Существа', 'Каталог магических существ', 'Ньют Скамандер'],
-  ['История', 'Хроники магического мира', 'Батильда Бэгшот'],
-  ['Трансфигурация', 'Практика трансфигурации', 'Минерва МакГонагалл'],
-  ['Руны', 'Древние руны и символы', 'Септима Вектор'],
-  ['Прорицания', 'Теория прорицаний', 'Кассандра Трелони'],
-  ['Гербология', 'Волшебные растения', 'Помона Спраут'],
-  ['ЗоТИ', 'Щиты и контрчары', 'Ремус Люпин'],
-  ['Артефакты', 'Магические артефакты Британии', 'Гаррик Олливандер']
-];
-
-function createBooks(count = 110) {
-  const books = [];
-  for (let i = 1; i <= count; i += 1) {
-    const theme = baseBookThemes[(i - 1) % baseBookThemes.length];
-    const grade = ((i - 1) % 7) + 1;
-    const [category, baseTitle, author] = theme;
-    books.push({
-      id: `book-${i}`,
-      title: `${baseTitle} • Том ${Math.ceil(i / 3)}`,
-      author,
-      category,
-      cover: `https://picsum.photos/seed/hogwarts-book-${i}/640/900`,
-      chapters: [
-        {
-          title: 'Глава I. Теория и основы',
-          text: [
-            `Этот том посвящён дисциплине «${category}» и адаптирован для ${grade} курса. Материал построен так, чтобы студент мог учиться без перегрузки и постепенно укреплять магическую технику.`,
-            'Каждый раздел начинается с исторического контекста, затем идут практические приёмы, типовые ошибки и блок безопасности. Это помогает избежать травм и конфликтов в ролевых сценах.',
-            'В конце главы добавлены мини-упражнения для самостоятельной практики и заметки преподавателей Хогвартса.'
-          ]
-        },
-        {
-          title: 'Глава II. Практика в замке и на территории',
-          text: [
-            'Глава описывает, как применять знания на уроках, факультативных активностях и в командной игре факультета. Все упражнения привязаны к лору Поттерианы и школьным правилам.',
-            'Особое внимание уделяется этике: нельзя использовать знания для унижения участников, нарушения дисциплины и сюжетного дисбаланса.',
-            'Если дисциплина связана с риском, добавлены рекомендации по взаимодействию с деканами, старостами и преподавателями.'
-          ]
-        },
-        {
-          title: 'Глава III. Справочник и расширенные заметки',
-          text: [
-            'В справочнике собраны таблицы: термины, ключевые заклинания/реакции, ингредиенты или существа, а также удобные подсказки для быстрых ролевых ответов.',
-            'Материалы согласованы под формат Telegram-школы: короткие уроки, задания в чате, недельные активности и межфакультетские события.',
-            'После изучения главы рекомендуется пройти мини-квиз или практикум с проверкой преподавателя.'
-          ]
-        }
-      ]
-    });
-  }
-
-  books.unshift(
-    {
-      id: 'canon-1',
-      title: 'Стандартная книга заклинаний (1 курс)',
-      author: 'Миранда Гошоук',
-      category: 'Заклинания',
-      cover: 'https://picsum.photos/seed/spellbook-canon/640/900',
-      chapters: [
-        {
-          title: 'Базовые чары',
-          text: [
-            'Вводный курс объясняет устройство палочковых жестов, акценты в произношении и контроль магического импульса.',
-            'Студент обязан отработать Люмос, Нокс и Вингардиум Левиоса перед переходом к более сложным чарам.'
-          ]
-        },
-        {
-          title: 'Дисциплина и безопасность',
-          text: [
-            'Чары нельзя использовать для запугивания, порчи чужих вещей и конфликтов между факультетами.',
-            'Во время занятий преподаватель фиксирует ошибки и назначает корректирующие упражнения.'
-          ]
-        }
-      ]
-    },
-    {
-      id: 'canon-2',
-      title: 'Волшебные зелья и их приготовление',
-      author: 'Арсениус Джиггер',
-      category: 'Зелья',
-      cover: 'https://picsum.photos/seed/potion-canon/640/900',
-      chapters: [
-        {
-          title: 'Точность рецептуры',
-          text: [
-            'Даже лишняя секунда кипения может изменить свойства зелья и превратить лечебный отвар в токсичную смесь.',
-            'Порядок внесения ингредиентов важнее скорости и зрелищности.'
-          ]
-        },
-        {
-          title: 'Классические ошибки',
-          text: [
-            'Самые частые ошибки: перегрев, некорректная нарезка ингредиентов и пропуск стабилизирующих компонентов.',
-            'Перед каждым практикумом необходимо сверять рецепт с преподавательскими пометками.'
-          ]
-        }
-      ]
-    }
-  );
-
-  return books;
-}
-
-const state = {
-  houses: load('houses', HOUSE_LIST),
-  lessonsByCourse: load('lessonsByCourse', {
-    1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: []
-  }),
-  articles: load('articles', [
-    {
-      title: 'Еженедельный сплетник открыт',
-      text: 'Основной выпуск выходит по воскресеньям. В течение недели администрация может публиковать дополнительные статьи о важных событиях.',
-      author: 'Редколлегия',
-      createdAt: new Date().toISOString()
-    }
+const S = {
+  houses: load('houses', [
+    { id: 'gryffindor', name: 'Гриффиндор', icon: '🦁', points: 0, color: '#c73c2c' },
+    { id: 'slytherin', name: 'Слизерин', icon: '🐍', points: 0, color: '#1f8f66' },
+    { id: 'ravenclaw', name: 'Когтевран', icon: '🦅', points: 0, color: '#446ac8' },
+    { id: 'hufflepuff', name: 'Пуффендуй', icon: '🦡', points: 0, color: '#d3ab43' }
   ]),
-  authorizedGazetteAuthors: load('authorizedGazetteAuthors', []),
-  notifyGazette: load('notifyGazette', false),
-  quidditch: load('quidditch', {
-    isOpen: false,
-    registrations: [],
-    matches: [],
-    lastAutoGenerated: null
-  }),
+  rules: load('rules', initialRules),
+  gazette: load('gazette', []),
+  lessons: load('lessons', { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [], 7: [] }),
   selectedCourse: 1,
-  books: createBooks(),
-  libraryFilter: '',
-  currentBookId: null,
+  notifyGazette: load('notifyGazette', false),
+  books: buildBooks(),
+  query: '',
+  librarySection: 'all',
   user: null,
-  botApiBase: load('botApiBase', 'https://your-backend.example.com/api')
+  botApiBase: load('botApiBase', '')
 };
 
-function load(key, fallback) {
+function load(k, def) {
   try {
-    const raw = localStorage.getItem(`hogwarts:${key}`);
-    return raw ? JSON.parse(raw) : fallback;
+    const v = localStorage.getItem(`hogwarts4:${k}`);
+    return v ? JSON.parse(v) : def;
   } catch {
-    return fallback;
+    return def;
   }
 }
 
-function save(key, value) {
-  localStorage.setItem(`hogwarts:${key}`, JSON.stringify(value));
+function save() {
+  localStorage.setItem('hogwarts4:houses', JSON.stringify(S.houses));
+  localStorage.setItem('hogwarts4:rules', JSON.stringify(S.rules));
+  localStorage.setItem('hogwarts4:gazette', JSON.stringify(S.gazette));
+  localStorage.setItem('hogwarts4:lessons', JSON.stringify(S.lessons));
+  localStorage.setItem('hogwarts4:notifyGazette', JSON.stringify(S.notifyGazette));
+  localStorage.setItem('hogwarts4:botApiBase', JSON.stringify(S.botApiBase));
 }
 
-function persistState() {
-  save('houses', state.houses);
-  save('lessonsByCourse', state.lessonsByCourse);
-  save('articles', state.articles);
-  save('authorizedGazetteAuthors', state.authorizedGazetteAuthors);
-  save('notifyGazette', state.notifyGazette);
-  save('quidditch', state.quidditch);
-  save('botApiBase', state.botApiBase);
+function tgUser() {
+  const u = tg?.initDataUnsafe?.user;
+  if (u) return u;
+  return { id: 1000, username: 'demo_student', first_name: 'Demo', last_name: '' };
 }
 
-function getTelegramUser() {
-  const tgUser = tg?.initDataUnsafe?.user;
-  if (tgUser) {
-    return {
-      id: tgUser.id,
-      username: tgUser.username || `id${tgUser.id}`,
-      first_name: tgUser.first_name || 'Студент',
-      last_name: tgUser.last_name || ''
-    };
-  }
-  return {
-    id: 999001,
-    username: 'demo_student',
-    first_name: 'Демо',
-    last_name: 'Пользователь'
+function can(perm) {
+  const list = roleMatrix[S.user.role] || [];
+  return list.includes('*') || list.includes(perm);
+}
+
+function resolveUser() {
+  const u = tgUser();
+  const key = String(u.username || '').toLowerCase();
+  S.user = {
+    id: u.id,
+    username: u.username || `id${u.id}`,
+    name: `${u.first_name || ''} ${u.last_name || ''}`.trim() || 'Студент',
+    role: roleByUsername[key] || 'student'
   };
 }
 
-function mapRoleByUsername(username) {
-  const normalized = (username || '').replace('@', '').toLowerCase();
-  const found = staffDirectory.find((p) => p.username.toLowerCase() === normalized);
-  if (!found) {
-    return { role: 'student', title: 'Студент', canWriteGazette: false };
-  }
-  const canWriteGazette =
-    ['admin_tech', 'admin_edu', 'dean_gryffindor', 'dean_ravenclaw', 'dean_hufflepuff', 'dean_slytherin'].includes(found.role)
-    || state.authorizedGazetteAuthors.includes(found.username.toLowerCase());
-  return { role: found.role, title: found.title, canWriteGazette };
-}
-
-function hasPerm(perm) {
-  const role = state.user.role;
-  const perms = PERMISSIONS[role] || PERMISSIONS.student;
-  return perms.includes('all') || perms.includes(perm);
-}
-
-async function syncToBot(action, payload) {
-  if (!state.botApiBase || state.botApiBase.includes('your-backend')) return;
-  try {
-    await fetch(`${state.botApiBase}/${action}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-  } catch (err) {
-    console.warn('syncToBot failed', err);
-  }
-}
-
-function renderHome() {
-  const root = document.getElementById('homeView');
-  root.innerHTML = `
-    <div class="card">
-      <h2>Кубок школы — песочные часы факультетов</h2>
-      <p class="muted">Очки можно менять из приложения (по ролям) и синхронизировать с ботом @school_hog_bot через backend API.</p>
-      <div class="grid houses">
-        ${state.houses.map((h) => `
-          <div class="card house" style="border-color:${h.color}88">
-            <div class="house-name">${h.crest} ${h.name}</div>
-            <div class="points">${h.points} очков</div>
-          </div>`).join('')}
-      </div>
-      <div class="quick-links">
-        <button class="pill" data-jump="rulesView">Устав школы</button>
-        <button class="pill" data-jump="staffView">Персонал Хогвартса</button>
-        <button class="pill" data-jump="gazetteView">Еженедельный сплетник</button>
-      </div>
-    </div>
-  `;
-
-  root.querySelectorAll('[data-jump]').forEach((btn) => {
-    btn.addEventListener('click', () => navigate(btn.dataset.jump));
-  });
-}
-
-function renderRules() {
-  const root = document.getElementById('rulesView');
-  root.innerHTML = `
-    <div class="card">
-      <h2>Устав школы</h2>
-      ${RULES.map((r) => `<div class="rule-item"><strong>${r.title}</strong><div class="small muted">${r.text}</div></div>`).join('')}
-    </div>
-  `;
-}
-
-function renderStaff() {
-  const root = document.getElementById('staffView');
-  root.innerHTML = `
-    <div class="card">
-      <h2>Персонал Хогвартса</h2>
-      <p class="muted">Директор пока не назначен. Софа — декан Гриффиндора.</p>
-      ${Object.entries(STAFF_SECTIONS).map(([section, items]) => `
-        <h3>${section}</h3>
-        ${items.map((item) => `<div class="staff-item">${item}</div>`).join('')}
-      `).join('')}
-    </div>
-  `;
-}
-
-function renderGazette() {
-  const root = document.getElementById('gazetteView');
-  const canWrite = state.user.canWriteGazette || hasPerm('submit_gazette');
-
-  root.innerHTML = `
-    <div class="two-col">
-      <div class="card">
-        <h2>Еженедельный сплетник</h2>
-        <p class="muted">Основной выпуск — каждое воскресенье. Внеплановые статьи выходят при важных событиях.</p>
-        <label><input id="notifyToggle" type="checkbox" ${state.notifyGazette ? 'checked' : ''}/> Уведомлять о новых выпусках</label>
-        <div id="articlesList">
-          ${state.articles.slice().reverse().map((a) => `
-            <div class="article-item">
-              <strong>${a.title}</strong>
-              <p>${a.text}</p>
-              <div class="small muted">${a.author} • ${new Date(a.createdAt).toLocaleString('ru-RU')}</div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-      <div class="card">
-        <h3>Подача материала</h3>
-        <p class="small muted">Любой студент может отправить предложение в редакцию. Публикация — после проверки администрацией.</p>
-        <textarea id="proposalText" placeholder="Текст заметки / сплетни / репортажа"></textarea>
-        <button id="proposalBtn" class="action-btn">Отправить в редакцию</button>
-        ${canWrite ? `
-          <hr/>
-          <h3>Публикация (админ/автор)</h3>
-          <input id="articleTitle" placeholder="Заголовок"/>
-          <textarea id="articleBody" placeholder="Текст статьи"></textarea>
-          <button id="publishBtn" class="action-btn">Опубликовать</button>
-        ` : '<p class="notice small">Права публикации выдаются администрацией.</p>'}
-      </div>
-    </div>
-  `;
-
-  root.querySelector('#notifyToggle').addEventListener('change', (e) => {
-    state.notifyGazette = e.target.checked;
-    persistState();
-  });
-
-  root.querySelector('#proposalBtn').addEventListener('click', async () => {
-    const text = root.querySelector('#proposalText').value.trim();
-    if (!text) return alert('Введите текст.');
-    await syncToBot('gazette-proposal', { user: state.user, text });
-    root.querySelector('#proposalText').value = '';
-    alert('Предложение отправлено в редакцию.');
-  });
-
-  if (canWrite) {
-    root.querySelector('#publishBtn').addEventListener('click', async () => {
-      const title = root.querySelector('#articleTitle').value.trim();
-      const text = root.querySelector('#articleBody').value.trim();
-      if (!title || !text) return alert('Заполните заголовок и текст.');
-
-      state.articles.push({ title, text, author: `@${state.user.username}`, createdAt: new Date().toISOString() });
-      persistState();
-      renderGazette();
-      await syncToBot('gazette-publish', { title, text, author: state.user.username, notify: state.notifyGazette });
-    });
-  }
-}
-
-function renderLibrary() {
-  const root = document.getElementById('libraryView');
-  const filter = state.libraryFilter.toLowerCase();
-  const books = state.books.filter((b) =>
-    [b.title, b.author, b.category].join(' ').toLowerCase().includes(filter)
-  );
-  root.innerHTML = `
-    <div class="card">
-      <h2>Библиотека Хогвартса</h2>
-      <p class="muted">Полноценные тома по лору Поттерианы: ${state.books.length} книг, а также разделы заклинаний, зелий и существ.</p>
-      <div class="library-controls">
-        <input id="librarySearch" placeholder="Поиск: заклинания, зелья, автор..." value="${state.libraryFilter}" />
-      </div>
-      <div class="grid books">
-        ${books.slice(0, 120).map((b) => `
-          <article class="card book-card">
-            <div class="book-title">${b.title}</div>
-            <p class="small muted">${b.author}</p>
-            <p class="small">Раздел: ${b.category} • Глав: ${b.chapters.length}</p>
-            <button class="action-btn" data-book="${b.id}">Открыть книгу</button>
-          </article>
-        `).join('')}
-      </div>
-      <h3>Справочники</h3>
-      <div class="grid books">
-        <article class="card">${spells.map((s) => `<div class="small"><strong>${s.name}</strong> — ${s.effect} (${s.level})</div>`).join('')}</article>
-        <article class="card">${potions.map((p) => `<div class="small"><strong>${p.name}</strong> — ${p.effect}<br><span class="muted">${p.recipe}</span></div>`).join('')}</article>
-        <article class="card">${creatures.map((c) => `<div class="small"><strong>${c.name}</strong> — ${c.description} <span class="muted">Опасность: ${c.danger}</span></div>`).join('')}</article>
-      </div>
-    </div>
-  `;
-
-  root.querySelector('#librarySearch').addEventListener('input', (e) => {
-    state.libraryFilter = e.target.value;
-    renderLibrary();
-  });
-
-  root.querySelectorAll('[data-book]').forEach((btn) => {
-    btn.addEventListener('click', () => openBook(btn.dataset.book));
-  });
-}
-
-function openBook(bookId) {
-  const book = state.books.find((b) => b.id === bookId);
-  if (!book) return;
-  const dialog = document.getElementById('bookDialog');
-  const content = document.getElementById('bookContent');
-  content.innerHTML = `
-    <h2>${book.title}</h2>
-    <p class="muted">Автор: ${book.author} • Раздел: ${book.category}</p>
-    ${book.chapters.map((c) => `
-      <h3>${c.title}</h3>
-      ${c.text.map((t) => `<p>${t}</p>`).join('')}
-    `).join('')}
-  `;
-  dialog.showModal();
-}
-
-document.getElementById('closeBookBtn').addEventListener('click', () => {
-  document.getElementById('bookDialog').close();
-});
-
-function renderLessons() {
-  const root = document.getElementById('lessonsView');
-  const canEdit = hasPerm('edit_lessons');
-  const lessons = state.lessonsByCourse[state.selectedCourse] || [];
-
-  root.innerHTML = `
-    <div class="card">
-      <h2>Расписание уроков</h2>
-      <p class="muted">Переключение по курсам 1–7. Заполняют администрация и преподаватели.</p>
-      <div class="quick-links">
-        ${[1,2,3,4,5,6,7].map((c) => `<button class="pill ${c===state.selectedCourse?'active':''}" data-course="${c}">${c} курс</button>`).join('')}
-      </div>
-      <div>
-        ${lessons.length ? lessons.map((l, i) => `
-          <div class="lesson-item">
-            <strong>${l.subject}</strong>
-            <div class="small muted">${l.teacher} • ${l.time} • ${l.place}</div>
-            ${canEdit ? `<button class="ghost-btn" data-del="${i}">Удалить</button>` : ''}
-          </div>
-        `).join('') : '<p class="notice">Пока расписание не заполнено.</p>'}
-      </div>
-      ${canEdit ? `
-        <h3>Добавить урок</h3>
-        <input id="subjectInput" placeholder="Предмет" />
-        <input id="teacherInput" placeholder="Преподаватель" />
-        <input id="timeInput" placeholder="Время" />
-        <input id="placeInput" placeholder="Место" />
-        <button id="addLessonBtn" class="action-btn">Сохранить урок</button>
-      ` : '<p class="small muted">Изменение расписания доступно преподавателям/администрации.</p>'}
-    </div>
-  `;
-
-  root.querySelectorAll('[data-course]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      state.selectedCourse = Number(btn.dataset.course);
-      renderLessons();
-    });
-  });
-
-  if (canEdit) {
-    root.querySelector('#addLessonBtn').addEventListener('click', async () => {
-      const subject = root.querySelector('#subjectInput').value.trim();
-      const teacher = root.querySelector('#teacherInput').value.trim();
-      const time = root.querySelector('#timeInput').value.trim();
-      const place = root.querySelector('#placeInput').value.trim();
-      if (!subject || !teacher || !time || !place) return alert('Заполните все поля.');
-      state.lessonsByCourse[state.selectedCourse].push({ subject, teacher, time, place });
-      persistState();
-      renderLessons();
-      await syncToBot('lessons-update', { course: state.selectedCourse, lessons: state.lessonsByCourse[state.selectedCourse] });
-    });
-
-    root.querySelectorAll('[data-del]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        state.lessonsByCourse[state.selectedCourse].splice(Number(btn.dataset.del), 1);
-        persistState();
-        renderLessons();
-        await syncToBot('lessons-update', { course: state.selectedCourse, lessons: state.lessonsByCourse[state.selectedCourse] });
-      });
-    });
-  }
-}
-
-function generateMatches() {
-  const ids = state.houses.map((h) => h.id);
-  const shuffled = ids.sort(() => Math.random() - 0.5);
-  const pairings = [];
-  for (let i = 0; i < shuffled.length; i += 2) {
-    pairings.push([shuffled[i], shuffled[i + 1]]);
-  }
-  return pairings.map((p, idx) => ({
-    id: `m-${Date.now()}-${idx}`,
-    houseA: p[0],
-    houseB: p[1],
-    winner: null,
-    playedAt: null
-  }));
-}
-
-function renderQuidditch() {
-  const root = document.getElementById('quidditchView');
-  const canManage = hasPerm('all');
-  const status = state.quidditch.isOpen ? 'Открыт' : 'Закрыт';
-  const statusCls = state.quidditch.isOpen ? 'status-open' : 'status-closed';
-
-  root.innerHTML = `
-    <div class="card">
-      <h2>Квиддич-турнир</h2>
-      <p>Статус: <strong class="${statusCls}">${status}</strong></p>
-      <p class="muted">Игроки записываются, когда турнир открыт. Пары факультетов генерируются автоматически.</p>
-      ${canManage ? `
-        <button id="toggleQuidditch" class="action-btn">${state.quidditch.isOpen ? 'Закрыть турнир' : 'Открыть турнир'}</button>
-        <button id="generateMatches" class="ghost-btn">Сгенерировать пары</button>
-      ` : ''}
-
-      ${state.quidditch.isOpen ? `
-        <h3>Запись игроков</h3>
-        <input id="quidditchRole" placeholder="Ваша роль (ловец, охотник...)" />
-        <button id="registerQuidditch" class="action-btn">Записаться</button>
-      ` : '<p class="small muted">Запись будет доступна после открытия турнира администрацией.</p>'}
-
-      <h3>Текущие матчи</h3>
-      ${(state.quidditch.matches || []).length ? state.quidditch.matches.map((m) => {
-        const a = state.houses.find((h) => h.id === m.houseA)?.name;
-        const b = state.houses.find((h) => h.id === m.houseB)?.name;
-        return `<div class="lesson-item">
-          <strong>${a} vs ${b}</strong><br>
-          <span class="small muted">${m.winner ? `Победитель: ${state.houses.find((h) => h.id === m.winner)?.name}` : 'Матч не завершён'}</span>
-          ${canManage && !m.winner ? `
-            <div class="quick-links">
-              <button class="pill" data-win="${m.id}:${m.houseA}">Победа ${a}</button>
-              <button class="pill" data-win="${m.id}:${m.houseB}">Победа ${b}</button>
-            </div>
-          ` : ''}
-        </div>`;
-      }).join('') : '<p class="muted">Пары ещё не сгенерированы.</p>'}
-    </div>
-  `;
-
-  if (canManage) {
-    root.querySelector('#toggleQuidditch')?.addEventListener('click', async () => {
-      state.quidditch.isOpen = !state.quidditch.isOpen;
-      persistState();
-      renderQuidditch();
-      await syncToBot('quidditch-status', { open: state.quidditch.isOpen });
-    });
-
-    root.querySelector('#generateMatches')?.addEventListener('click', async () => {
-      state.quidditch.matches = generateMatches();
-      state.quidditch.lastAutoGenerated = new Date().toISOString();
-      persistState();
-      renderQuidditch();
-      await syncToBot('quidditch-matches', { matches: state.quidditch.matches });
-    });
-
-    root.querySelectorAll('[data-win]').forEach((btn) => {
-      btn.addEventListener('click', async () => {
-        const [matchId, winner] = btn.dataset.win.split(':');
-        const match = state.quidditch.matches.find((m) => m.id === matchId);
-        if (!match) return;
-        match.winner = winner;
-        match.playedAt = new Date().toISOString();
-        const house = state.houses.find((h) => h.id === winner);
-        house.points += 35;
-        persistState();
-        renderHome();
-        renderQuidditch();
-        await syncToBot('house-points', { houseId: winner, delta: 35, reason: 'quidditch_win' });
-      });
-    });
-  }
-
-  root.querySelector('#registerQuidditch')?.addEventListener('click', async () => {
-    const role = root.querySelector('#quidditchRole').value.trim();
-    if (!role) return alert('Укажите роль.');
-    state.quidditch.registrations.push({ user: state.user.username, role, createdAt: new Date().toISOString() });
-    persistState();
-    await syncToBot('quidditch-register', { username: state.user.username, role });
-    alert('Вы записаны в турнирный список.');
-  });
-}
-
-function renderProfile() {
-  const root = document.getElementById('profileView');
-  root.innerHTML = `
-    <div class="two-col">
-      <div class="card">
-        <h2>Профиль</h2>
-        <div><strong>${state.user.first_name} ${state.user.last_name || ''}</strong> (@${state.user.username})</div>
-        <div class="small muted">Telegram ID: ${state.user.id}</div>
-        <div class="role-badge">${state.user.title}</div>
-        <h3>Права в приложении</h3>
-        ${(PERMISSIONS[state.user.role] || []).map((p) => `<div class="permission-line small">• ${p}</div>`).join('')}
-      </div>
-      <div class="card">
-        <h3>Управление школой</h3>
-        ${hasPerm('manage_points') || hasPerm('all') ? `
-          <p class="small muted">Добавление/снятие очков факультетов:</p>
-          <select id="houseSelect">${state.houses.map((h) => `<option value="${h.id}">${h.name}</option>`).join('')}</select>
-          <input id="pointsDelta" type="number" placeholder="Например: 10 или -5" />
-          <input id="pointsReason" placeholder="Причина" />
-          <button id="savePoints" class="action-btn">Применить</button>
-        ` : '<p class="muted">Недоступно для вашей роли.</p>'}
-
-        ${hasPerm('all') ? `
-          <h3>Выдача прав автора сплетника</h3>
-          <input id="gazetteAuthor" placeholder="username без @" />
-          <button id="addGazetteAuthor" class="ghost-btn">Добавить автора</button>
-          <div class="small muted">Текущие авторы: ${state.authorizedGazetteAuthors.join(', ') || 'нет'}</div>
-          <h3>Интеграция с ботом</h3>
-          <input id="botApiInput" value="${state.botApiBase}" placeholder="https://..." />
-          <button id="saveBotApi" class="ghost-btn">Сохранить API URL</button>
-        ` : ''}
-      </div>
-    </div>
-  `;
-
-  if (hasPerm('manage_points') || hasPerm('all')) {
-    root.querySelector('#savePoints').addEventListener('click', async () => {
-      const houseId = root.querySelector('#houseSelect').value;
-      const delta = Number(root.querySelector('#pointsDelta').value || 0);
-      const reason = root.querySelector('#pointsReason').value.trim() || 'manual_adjustment';
-      if (!delta) return alert('Укажите значение отличное от 0.');
-      const house = state.houses.find((h) => h.id === houseId);
-      house.points += delta;
-      persistState();
-      renderHome();
-      await syncToBot('house-points', { houseId, delta, reason, by: state.user.username });
-      alert('Очки обновлены.');
-    });
-  }
-
-  if (hasPerm('all')) {
-    root.querySelector('#addGazetteAuthor').addEventListener('click', () => {
-      const username = root.querySelector('#gazetteAuthor').value.trim().toLowerCase().replace('@', '');
-      if (!username) return;
-      if (!state.authorizedGazetteAuthors.includes(username)) {
-        state.authorizedGazetteAuthors.push(username);
-        persistState();
-        renderProfile();
-      }
-    });
-    root.querySelector('#saveBotApi').addEventListener('click', () => {
-      const url = root.querySelector('#botApiInput').value.trim();
-      state.botApiBase = url;
-      persistState();
-      alert('API URL сохранён.');
-    });
-  }
-}
-
-function navigate(viewId) {
+function go(viewId) {
   document.querySelectorAll('.view').forEach((v) => v.classList.remove('active'));
   document.getElementById(viewId).classList.add('active');
-  document.querySelectorAll('.tab-btn').forEach((b) => b.classList.toggle('active', b.dataset.route === viewId));
+  document.querySelectorAll('.nav-btn').forEach((b) => b.classList.toggle('active', b.dataset.view === viewId));
 }
 
-function initUser() {
-  const tgUser = getTelegramUser();
-  const roleData = mapRoleByUsername(tgUser.username);
-  state.user = { ...tgUser, ...roleData };
+function home() {
+  const max = Math.max(...S.houses.map((h) => h.points), 1);
+  const root = document.getElementById('castleView');
+  root.innerHTML = `
+    <div class="hero"><div style="font-size:42px">🏰</div><h2>Добро пожаловать в Хогвартс</h2><p class="small"><i>Draco dormiens nunquam titillandus</i></p></div>
+    <div class="card">
+      <h3 class="section-title">⌛ Песочные часы факультетов</h3>
+      <div class="hours">${S.houses.map((h) => `<div class="hour"><div style="font-size:33px">${h.icon}</div><div class="tube"><div class="fill" style="height:${Math.round((h.points / max) * 100)}%; background:${h.color}"></div></div><div class="house-points" style="color:${h.color}">${h.points}</div><div class="house-name">${h.name}</div></div>`).join('')}</div>
+    </div>
+    <button class="menu-btn" id="openRules">📜 Устав школы →</button>
+    <button class="menu-btn" id="openStaff">👥 Персонал Хогвартса →</button>
+    <button class="menu-btn" id="openGazette">📰 Еженедельный Сплетник →</button>
+  `;
+  root.querySelector('#openRules').onclick = () => go('rulesView');
+  root.querySelector('#openStaff').onclick = () => go('staffView');
+  root.querySelector('#openGazette').onclick = () => go('gazetteView');
 }
 
-function renderAll() {
-  renderHome();
-  renderRules();
-  renderStaff();
-  renderGazette();
-  renderLibrary();
-  renderLessons();
-  renderQuidditch();
-  renderProfile();
+function rules() {
+  const root = document.getElementById('rulesView');
+  root.innerHTML = `
+    <div class="hero"><div style="font-size:40px">📜</div><h2>Устав Хогвартса</h2></div>
+    <div class="card">${S.rules.map((r) => `<details class="acc"><summary>${r.title}</summary><p>${r.body}</p></details>`).join('')}</div>
+    <button class="btn" id="backCastle1">← Вернуться в Замок</button>
+  `;
+  root.querySelector('#backCastle1').onclick = () => go('castleView');
 }
 
-function initEvents() {
-  document.querySelectorAll('.tab-btn').forEach((btn) => {
-    btn.addEventListener('click', () => navigate(btn.dataset.route));
+function staffView() {
+  const sections = [...new Set(staff.map((x) => x.section))];
+  const root = document.getElementById('staffView');
+  root.innerHTML = `
+    <div class="hero"><h2>👥 Персонал Хогвартса</h2></div>
+    ${sections.map((sec) => `<div class="card"><h3 class="section-title">${sec}</h3>${staff.filter((p) => p.section === sec).map((p) => `<div class="staff-row"><div><div><b>${p.name}</b></div><div class="tag">${p.role}</div></div><div class="nick">@${p.username}</div></div>`).join('')}</div>`).join('')}
+    <button class="btn" id="backCastle2">← Вернуться в Замок</button>
+  `;
+  root.querySelector('#backCastle2').onclick = () => go('castleView');
+}
+
+function gazetteView() {
+  const canPublish = can('gazette:publish') || can('*');
+  const root = document.getElementById('gazetteView');
+  root.innerHTML = `
+    <div class="hero"><h2>📰 Еженедельный сплетник</h2></div>
+    <div class="card">
+      <label><input id="noti" type="checkbox" ${S.notifyGazette ? 'checked' : ''}/> Уведомлять о новых выпусках</label>
+      <p class="small">Воскресенье — основной выпуск. Дополнительные статьи — по событиям недели.</p>
+      ${S.gazette.length ? S.gazette.slice().reverse().map((a) => `<article class="article"><h3 class="section-title">${a.title}</h3><p>${a.text}</p><div class="tag">${a.author} • ${new Date(a.date).toLocaleString('ru-RU')}</div></article>`).join('') : '<div class="article">Пока выпусков нет.</div>'}
+    </div>
+    <div class="grid2">
+      <div class="card controls"><h3 class="section-title">Отправить материал в редакцию</h3><textarea id="proposal" placeholder="Твой текст"></textarea><button class="btn" id="sendProposal">Отправить</button></div>
+      <div class="card controls"><h3 class="section-title">Публикация (админ/препод)</h3>${canPublish ? '<input id="pubTitle" placeholder="Заголовок"/><textarea id="pubText" placeholder="Текст статьи"></textarea><button class="btn" id="publish">Опубликовать</button>' : '<div class="tag">Нет прав публикации</div>'}</div>
+    </div>
+  `;
+
+  root.querySelector('#noti').onchange = (e) => { S.notifyGazette = e.target.checked; save(); };
+  root.querySelector('#sendProposal').onclick = async () => {
+    const text = root.querySelector('#proposal').value.trim();
+    if (!text) return alert('Напиши текст.');
+    await sync('proposal', { text, by: S.user.username });
+    root.querySelector('#proposal').value = '';
+    alert('Отправлено в редакцию.');
+  };
+
+  if (canPublish) {
+    root.querySelector('#publish').onclick = async () => {
+      const title = root.querySelector('#pubTitle').value.trim();
+      const text = root.querySelector('#pubText').value.trim();
+      if (!title || !text) return alert('Заполни все поля.');
+      S.gazette.push({ title, text, author: `@${S.user.username}`, date: Date.now() });
+      save();
+      gazetteView();
+      await sync('publish', { title, text, author: S.user.username, notify: S.notifyGazette });
+    };
+  }
+}
+
+function lessonsView() {
+  const editable = can('lessons:edit') || can('*');
+  const list = S.lessons[S.selectedCourse] || [];
+  const root = document.getElementById('lessonsView');
+  root.innerHTML = `
+    <div class="hero"><h2>📅 Уроки</h2><p class="small">Курсы 1–7 • пока без предзаполнения</p></div>
+    <div class="card">
+      <div class="btn-row">${[1,2,3,4,5,6,7].map((n) => `<button class="btn" data-c="${n}">${n} курс</button>`).join('')}</div>
+      ${list.length ? list.map((x, i) => `<div class="lesson"><b>${x.subject}</b><div class="tag">${x.teacher} • ${x.time} • ${x.place}</div>${editable ? `<button class="btn" data-del="${i}">Удалить</button>` : ''}</div>`).join('') : '<div class="lesson">Расписание пока пустое. Его заполнит администрация или преподаватели.</div>'}
+    </div>
+    ${editable ? '<div class="card controls"><h3 class="section-title">Добавить урок</h3><input id="lsub" placeholder="Предмет"/><input id="ltea" placeholder="Учитель"/><input id="ltime" placeholder="Время"/><input id="lplace" placeholder="Место"/><button class="btn" id="addLesson">Сохранить</button></div>' : ''}
+  `;
+
+  root.querySelectorAll('[data-c]').forEach((b) => { b.onclick = () => { S.selectedCourse = Number(b.dataset.c); lessonsView(); }; });
+
+  if (editable) {
+    root.querySelectorAll('[data-del]').forEach((b) => {
+      b.onclick = async () => {
+        list.splice(Number(b.dataset.del), 1);
+        save();
+        lessonsView();
+        await sync('lessons', { course: S.selectedCourse, lessons: list });
+      };
+    });
+
+    root.querySelector('#addLesson').onclick = async () => {
+      const subject = root.querySelector('#lsub').value.trim();
+      const teacher = root.querySelector('#ltea').value.trim();
+      const time = root.querySelector('#ltime').value.trim();
+      const place = root.querySelector('#lplace').value.trim();
+      if (!subject || !teacher || !time || !place) return alert('Заполни все поля.');
+      list.push({ subject, teacher, time, place });
+      save();
+      lessonsView();
+      await sync('lessons', { course: S.selectedCourse, lessons: list });
+    };
+  }
+}
+
+function libraryView() {
+  const root = document.getElementById('libraryView');
+  const data = S.books.filter((b) => {
+    const matchesText = `${b.title} ${b.categoryLabel} ${b.author}`.toLowerCase().includes(S.query.toLowerCase());
+    const matchesSection = S.librarySection === 'all' || b.section === S.librarySection;
+    return matchesText && matchesSection;
   });
 
-  document.getElementById('openProfileBtn').addEventListener('click', () => navigate('profileView'));
+  root.innerHTML = `
+    <div class="hero"><h2>📖 Библиотека Хогвартса</h2><p class="small">${S.books.length} книг в каталоге</p></div>
+    <div class="card controls"><input id="q" placeholder="Поиск по названию, автору или теме..." value="${S.query}"/><div class="chip-row">${LIBRARY_SECTIONS.map((s) => `<button class="chip ${S.librarySection === s.id ? 'active' : ''}" data-sec="${s.id}">${s.label}</button>`).join('')}</div></div>
+    <div class="books">${data.map((b) => `<article class="book-tile" style="--cover:${b.cover}"><div class="book-spine">${b.categoryLabel}</div><h4>${b.title}</h4><div class="tag">${b.author}</div>${b.image ? `<img class="book-thumb" src="${b.image}" alt="${b.title}" loading="lazy"/>` : ''}<button class="btn" data-book="${b.id}">Открыть книгу</button></article>`).join('')}</div>
+  `;
+
+  root.querySelector('#q').oninput = (e) => { S.query = e.target.value; libraryView(); };
+  root.querySelectorAll('[data-sec]').forEach((b) => { b.onclick = () => { S.librarySection = b.dataset.sec; libraryView(); }; });
+  root.querySelectorAll('[data-book]').forEach((b) => { b.onclick = () => openBook(b.dataset.book); });
+}
+
+function openBook(id) {
+  const book = S.books.find((x) => x.id === id);
+  if (!book) return;
+  const modal = document.getElementById('bookModal');
+  const body = document.getElementById('bookInner');
+  body.innerHTML = `
+    <header class="reader-head"><div class="book-seal">✦</div><div><h2>${book.title}</h2><div class="tag">${book.author} • ${book.categoryLabel}</div></div></header>
+    ${book.image ? `<img class="reader-image" src="${book.image}" alt="${book.title}" loading="lazy"/>` : ''}
+    ${book.recipe ? `<div class="reader-note"><b>Рецепт:</b> ${book.recipe}</div>` : ''}
+    ${book.appearance ? `<div class="reader-note"><b>Как выглядит:</b> ${book.appearance}</div>` : ''}
+    ${book.chapters.map((ch) => `<section class="reader-chapter"><h3>${ch.title}</h3>${ch.paragraphs.map((p) => `<p>${p}</p>`).join('')}</section>`).join('')}
+  `;
+  modal.showModal();
+}
+
+function profileView() {
+  const pointsControl = can('points:edit') || can('*');
+  const root = document.getElementById('profileView');
+  root.innerHTML = `
+    <div class="hero"><h2>👤 Профиль</h2></div>
+    <div class="card"><div><b>${S.user.name}</b> (@${S.user.username})</div><div class="tag">Telegram ID: ${S.user.id}</div><div class="tag">Роль: ${S.user.role}</div></div>
+    <div class="card"><h3 class="section-title">🏆 Управление очками факультетов</h3>${pointsControl ? `<select id="phouse">${S.houses.map((h) => `<option value="${h.id}">${h.name}</option>`).join('')}</select><input id="pdelta" type="number" placeholder="Например 10 или -5"/><input id="preason" placeholder="Причина"/><button class="btn" id="setPoints">Применить</button>` : '<div class="tag">Нет прав на изменение очков.</div>'}</div>
+    <div class="card controls"><h3 class="section-title">Интеграция с ботом</h3><input id="api" value="${S.botApiBase}" placeholder="https://your-backend/api"/><button class="btn" id="saveApi">Сохранить API</button><p class="small">Для общей синхронизации между всеми пользователями нужен backend.</p></div>
+  `;
+
+  if (pointsControl) {
+    root.querySelector('#setPoints').onclick = async () => {
+      const houseId = root.querySelector('#phouse').value;
+      const delta = Number(root.querySelector('#pdelta').value || 0);
+      if (!delta) return alert('Укажи значение, отличное от 0.');
+      const reason = root.querySelector('#preason').value.trim() || 'manual';
+      S.houses.find((h) => h.id === houseId).points += delta;
+      save();
+      home();
+      await sync('points', { houseId, delta, reason, by: S.user.username });
+      alert('Очки обновлены.');
+    };
+  }
+
+  root.querySelector('#saveApi').onclick = () => {
+    S.botApiBase = root.querySelector('#api').value.trim();
+    save();
+    alert('Сохранено.');
+  };
+}
+
+document.getElementById('closeBook').onclick = () => document.getElementById('bookModal').close();
+
+async function sync(endpoint, payload) {
+  if (!S.botApiBase) return;
+  try {
+    await fetch(`${S.botApiBase}/${endpoint}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  } catch {
+    // local mode
+  }
+}
+
+const RAW_CREATURES = `
+Абаримон
+Абраксанский крылатый конь
+Авгурей
+Акромантул
+Акромантулы Запретного леса
+Апполосская пушишка
+Банши
+Белый речной монстр
+Бес малый
+Боггарт
+Болтрушайка
+Большая пурпурная жаба
+Бундимун
+Валлийский зелёный дракон
+Вампир
+Вампус
+Василиск
+Вейла
+Великаны
+Венгерский хвосторог
+Веретенница
+Взрывопотам
+Виверна
+Водяной из озера Лох-Ломонд
+Гебридский чёрный дракон
+Гелиопат
+Гигантский кальмар
+Гиппогриф
+Гиппокамп
+Глиноклок
+Гном садовый
+Гоблины
+Горный тролль
+Гранианский крылатый конь
+Грим
+Гриндилоу
+Грифон
+Двурог
+Дементор
+Демимаска
+Джарви
+Диринар
+Докси
+Домашние эльфы
+Дракон
+Дромарог
+Единорог
+Жмыр
+Золотой сниджет
+Зомби
+Инфернал
+Йети
+Каппа
+Каталонский огненный шар
+Кельпи
+Китайский огненный шар
+Клабберт
+Клювокрыл
+Кокатрис
+Красные колпаки
+Крылатый конь
+Лепрекон
+Лесной тролль
+Летучие мыши-вампиры
+Лох-несское чудовище
+Лукотрус
+Лунный телец
+Мантикора
+Матагот
+Мерроу
+Мозгошмыг
+Морской змей
+Морщерогий кизляк
+Наргл
+Нарл
+Норвежский горбатый дракон
+Нунду
+Нюхлер
+Оборотень
+Обскур
+Огневица
+Огненный краб
+Огр
+Оккамий
+Опаловоглазый антипод
+Пакваджи
+Перуанский змеезуб
+Пикирующий злыдень
+Пикси
+Погребин
+Полтергейст
+Португальский длиннорылый дракон
+Почтовые совы
+Птица-гром
+Пушишка
+Пятиног
+Растопырник
+Ре-эм
+Речной тролль
+Рогатый змей
+Румынский длиннорог
+Рунеспур
+Русалки и тритоны
+Саламандра
+Сасквотч
+Селки
+Сирены
+Скрытень
+Смеркут
+Сналлигастер
+Соплохвост
+Сфинкс
+Трёхголовая собака
+Тролль из Надрож
+Украинский железнобрюхий дракон
+Упырь
+Фвупер
+Феникс
+Фестрал
+Фея
+Флоббер-червь
+Химера
+Ходаг
+Цилинь
+Чизпурфл
+Чупакабра
+Шведский короткорылый дракон
+Штырехвост
+Эрклинг
+Этонский крылатый конь
+Ядовитая утка
+Ямбо
+`;
+
+const RAW_ITEMS = `
+Часы Фабиана Пруэтта
+Чаша Пенелопы Пуффендуй
+Чемодан Ньюта Саламандера
+Банкомат банка Гринготтс
+Бисерная сумочка Гермионы Грейнджер
+Бита загонщика
+Бладжер
+Бронзовый котёл
+Волшебная палатка
+Волшебное фото
+Волшебные часы Уизли
+Волшебные шахматы
+Волшебный глаз Грюма
+Воскрешающий камень
+Вредноскоп
+Громовещатель
+Дары Смерти
+Делюминатор
+Детектор лжи
+Диадема Кандиды Когтевран
+Зачарованные монеты
+Зеркало Еиналеж
+Зеркало Сириуса
+Золотое яйцо
+Карта Мародёров
+Книга доступа
+Ковёр-самолёт
+Котёл
+Кубок Огня
+Летучий порох
+Луноскоп
+Мантия-невидимка
+Маска Пожирателя Смерти
+Маховик времени
+Медальон Слизерина
+Меч Гриффиндора
+Напоминалка
+Невидимые чернила
+Негаснущая свеча
+Оловянный котёл
+Омнинокль
+Омут памяти
+Остроконечная шляпа
+Пергамент
+Перо приёма
+Песочные часы факультетов
+Портал
+Портрет
+Проклятое ожерелье
+Проявитель врагов
+Прытко Пишущее Перо
+Рука славы
+Серебряная рука
+Спектрально-астральные очки
+Сундук Аластора Грюма
+Философский камень
+Фотоальбом Гарри Поттера
+Фотография Ордена Феникса
+Хрустальный шар
+Часы Аластора Грюма
+Часы Дамблдора
+`;
+
+const MAGIC_OVERVIEW = [
+  'Магия недоступна маглам и сквибам, что и отличает их от волшебников; маглы развивают технологии там, где волшебники используют чары.',
+  'Согласно Международному статуту о секретности (1689), магическое сообщество скрывает свою природу от магловского мира.',
+  'Тёмные искусства считаются опасной областью: за применение запрещённых практик предусмотрены тяжёлые наказания вплоть до Азкабана.',
+  'Древняя магия — редчайшая ветвь, к XIX веку почти утраченная; в истории Хогвартса она упоминается как основа древних защит замка.'
+];
+
+function uniqueList(raw) {
+  return [...new Set(raw.split('\n').map((x) => x.trim()).filter(Boolean))];
+}
+
+function buildBooks() {
+  const catalog = [
+    book('sp1', 'spells', 'Стандартная книга заклинаний. 1 курс', 'Миранда Гошоук', '#5c2b1d', [
+      chapter('Базовые чары', ['Lumos, Nox, Wingardium Leviosa и Alohomora относятся к базовой школьной программе.', 'Главное правило: чёткая формула + точная траектория палочки + стабильная концентрация.', 'Для новичков важнее аккуратность, чем скорость.']),
+      chapter('Безопасность', ['Не направляй тренировочные чары в лицо ученика.', 'При срыве эффекта сразу используй Finite и зови преподавателя.'])
+    ], { image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1200&q=80' }),
+
+    book('sp2', 'spells', 'Продвинутые защитные чары', 'Филиус Флитвик', '#4b2e5e', [
+      chapter('Щитовые заклинания', ['Protego отражает часть атакующих чар, но не заменяет тактику.', 'В дуэльной практике важен тайминг: ставить щит до попадания, а не после.']),
+      chapter('Патронус', ['Expecto Patronum требует устойчивого светлого воспоминания.', 'В учебной практике даже нетелесная форма уже считается успехом.'])
+    ]),
+
+    book('pt1', 'potions', 'Волшебные зелья и их приготовление', 'Арсениус Джиггер', '#365230', [
+      chapter('Техника приготовления', ['Порядок ингредиентов критичен: ошибка в этапе может испортить весь котёл.', 'Температура и направление помешивания всегда идут по рецепту.']),
+      chapter('Учебные составы', ['В школьной практике чаще всего изучают заживляющие, укрепляющие и диагностические составы.'])
+    ], {
+      image: 'https://images.unsplash.com/photo-1516912481808-3406841bd33c?auto=format&fit=crop&w=1200&q=80',
+      recipe: 'Шаги: подготовить котёл → измельчить ингредиенты по инструкции → поддерживать нужный огонь → добавлять компоненты по таймеру.',
+      appearance: 'Корректно сваренное зелье обычно имеет ровный цвет, без крупных хлопьев и резкого едкого дыма.'
+    }),
+
+    book('pt2', 'potions', 'Продвинутое зельеварение', 'Либатиус Борадж', '#40512d', [
+      chapter('Амортеция', ['Амортеция известна как сильнейшее любовное зелье, но не создаёт настоящую любовь.', 'В каноне рассматривается как этически опасный инструмент манипуляции.']),
+      chapter('Феликс Фелицис', ['Редкое зелье кратковременной удачи. Передозировка опасна и строго запрещена.'])
+    ], {
+      image: 'https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=1200&q=80',
+      appearance: 'Характерные признаки «удачной» варки: ровная консистенция и тонкое золотистое мерцание на поверхности.'
+    }),
+
+    book('cr1', 'creatures', 'Фантастические звери и места их обитания', 'Ньют Скамандер', '#4b3a2a', [
+      chapter('Классификация Министерства', ['Существа получают категорию X–XXXXX по уровню опасности.', 'Категория отражает риск контакта, а не «злой характер» вида.']),
+      chapter('Гиппогрифы', ['Подходить только после поклона и ожидания ответного жеста.', 'Неуважение трактуется как вызов.'])
+    ], { image: 'https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=1200&q=80' }),
+
+    book('cr2', 'creatures', 'Драконы мира', 'Чарли Уизли (сост.)', '#6d4024', [
+      chapter('Известные породы', ['Венгерская хвосторога, норвежский горбатый и китайский огненный шар — одни из самых известных.', 'Работа с драконами допускается только специалистам заповедников.'])
+    ], { image: 'https://images.unsplash.com/photo-1619468129361-605ebea04b44?auto=format&fit=crop&w=1200&q=80' }),
+
+    book('it1', 'items', 'Волшебные палочки: древесина и сердцевина', 'Гаррик Олливандер', '#513722', [
+      chapter('Выбор палочки', ['Палочка выбирает волшебника: учитываются темперамент, стиль магии и устойчивость характера.', 'Классические сердцевины: волос единорога, перо феникса, сердечная жила дракона.'])
+    ], { image: 'https://images.unsplash.com/photo-1513467535987-fd81bc7d62f8?auto=format&fit=crop&w=1200&q=80' }),
+
+    book('it2', 'items', 'Карта Мародёров и магические карты', 'Школьный архив', '#3f2b29', [
+      chapter('Живые карты', ['Магические карты могут показывать перемещения и скрытые проходы.', 'Подобные артефакты обычно ограничиваются правилами доступа из-за вопросов приватности.'])
+    ]),
+
+    book('it3', 'items', 'Квиддич: метлы, снитч и инвентарь', 'Библиотека Хогвартса', '#5d4121', [
+      chapter('Основы', ['Команда состоит из семи игроков: 3 охотника, 2 загонщика, вратарь, ловец.', 'Поимка снитча приносит 150 очков и часто завершает матч.'])
+    ], { image: 'https://images.unsplash.com/photo-1511882150382-421056c89033?auto=format&fit=crop&w=1200&q=80' }),
+
+    book('sb1', 'subjects', 'Теория трансфигурации', 'Минерва Макгонагалл', '#314c6f', [
+      chapter('Законы Гэмпа', ['Исключения элементарной трансфигурации ограничивают преобразование ряда категорий материи.', 'Сначала изучают неодушевлённые объекты, затем сложные формы.'])
+    ]),
+
+    book('hs1', 'history', 'История магии Британии', 'Батильда Бэгшот', '#493e35', [
+      chapter('Статут о секретности', ['Статут о секретности закрепил разделение магического и немагического миров.', 'Современные школьные правила по скрытности опираются на эту основу.'])
+    ]),
+
+    book('tl1', 'tales', 'Сказки барда Бидля', 'Бард Бидль', '#5c3b4a', [
+      chapter('Сказка о трёх братьях', ['Притча о Старшей палочке, Воскрешающем камне и Мантии-невидимке говорит о цене силы и выборе.', 'Считается культурным фундаментом магического фольклора Британии.'])
+    ]),
+    book('mg1', 'subjects', 'Магия: основы волшебного мира', 'Хогвартс, учебный архив', '#3e3651', [
+      chapter('Общая теория', MAGIC_OVERVIEW),
+      chapter('Содержание дисциплины', ['Магия людей', 'Стихийная магия и магия без палочки', 'Магия существ и предметов', 'Зельеварение и магические существа/растения'])
+    ])
+  ];
+
+  const templates = [
+    ['spells', 'Практикум по чарам', 'Кафедра Заклинаний', '#4a3056'],
+    ['potions', 'Лаборатория зелий', 'Кафедра Зельеварения', '#35503a'],
+    ['creatures', 'Полевой бестиарий', 'Кафедра УЗМС', '#5c4028'],
+    ['items', 'Справочник артефактов', 'Кабинет истории магии', '#5b3e2a'],
+    ['subjects', 'Учебный конспект', 'Совет преподавателей', '#3a4a66'],
+    ['history', 'Исторические заметки', 'Школьный архив', '#5a4736'],
+    ['tales', 'Сборник преданий', 'Библиотека Хогвартса', '#5a3447']
+  ];
+
+  const generated = [];
+  const creatures = uniqueList(RAW_CREATURES);
+  const items = uniqueList(RAW_ITEMS);
+
+  creatures.forEach((name, idx) => {
+    generated.push(
+      book(`cre-${idx + 1}`, 'creatures', `Существо: ${name}`, 'Справочник магозоологии', '#4a3a2a', [
+        chapter('Краткое описание', [
+          `${name} упоминается в материалах магического мира как самостоятельный вид или подвид волшебных существ.`,
+          'В учебной практике Хогвартса для каждого существа фиксируют среду обитания, уровень угрозы и правила безопасного контакта.'
+        ]),
+        chapter('Поведение и осторожность', [
+          'Перед очным взаимодействием изучают повадки, реакцию на свет/шум и допустимую дистанцию.',
+          'Контакт со сложными существами проводится только при сопровождении преподавателя УЗМС.'
+        ])
+      ])
+    );
+  });
+
+  items.forEach((name, idx) => {
+    generated.push(
+      book(`itm-${idx + 1}`, 'items', `Предмет: ${name}`, 'Каталог волшебных артефактов', '#5a3d2a', [
+        chapter('Назначение', [
+          `${name} относится к волшебным предметам, используемым в быту, учебе, защите или истории магического сообщества.`,
+          'В описаниях учитываются происхождение предмета, ограничения по применению и потенциальные риски.'
+        ]),
+        chapter('Практика и хранение', [
+          'Артефакты с мощными чарами требуют отдельного хранения и журнала доступа.',
+          'Использование школьных артефактов разрешается только по правилам кабинета и под надзором ответственного преподавателя.'
+        ])
+      ])
+    );
+  });
+
+  for (let i = 1; i <= 30; i++) {
+    const t = templates[i % templates.length];
+    generated.push(book(`gen${i}`, t[0], `${t[1]} — том ${i}`, t[2], t[3], [
+      chapter('Глава I. Контекст', ['Материал оформлен как библиотечный том Хогвартса: историческое вступление, терминология и заметки по безопасности.', 'Содержание адаптировано для уроков, ролевых сцен и самостоятельного чтения.']),
+      chapter('Глава II. Практика', ['Раздел содержит учебные сценарии, типичные ошибки и способы их исправления.', 'Сложные действия рекомендуется согласовывать с преподавателем или администрацией.'])
+    ], i % 6 === 0 ? { image: 'https://images.unsplash.com/photo-1512820790803-83ca734da794?auto=format&fit=crop&w=1200&q=80' } : null));
+  }
+
+  return [...catalog, ...generated];
+}
+
+function book(id, section, title, author, cover, chapters, meta = null) {
+  return { id, section, title, author, cover, chapters, categoryLabel: sectionLabel(section), ...(meta || {}) };
+}
+
+function chapter(title, paragraphs) {
+  return { title, paragraphs };
+}
+
+function sectionLabel(section) {
+  const x = LIBRARY_SECTIONS.find((s) => s.id === section);
+  return x ? x.label : 'Разное';
+}
+
+function bindNav() {
+  document.querySelectorAll('.nav-btn').forEach((btn) => {
+    btn.onclick = () => go(btn.dataset.view);
+  });
 }
 
 function boot() {
-  initUser();
-  initEvents();
-  renderAll();
-  navigate('homeView');
+  resolveUser();
+  bindNav();
+  home();
+  rules();
+  staffView();
+  gazetteView();
+  lessonsView();
+  libraryView();
+  profileView();
 }
 
 boot();

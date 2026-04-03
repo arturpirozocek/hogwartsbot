@@ -2,6 +2,12 @@
 <html lang="ru">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Хогвартс — Школа Чародейства и Волшебства</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Manrope:wght@400;500;700&display=swap"
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Hogwarts School App</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -14,6 +20,35 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
+    <div class="app-bg"></div>
+    <main class="shell">
+      <header class="top">
+        <h1>✦ ХОГВАРТС ✦</h1>
+        <p>Школа Чародейства и Волшебства</p>
+      </header>
+
+      <section id="castleView" class="view active"></section>
+      <section id="rulesView" class="view"></section>
+      <section id="staffView" class="view"></section>
+      <section id="gazetteView" class="view"></section>
+      <section id="lessonsView" class="view"></section>
+      <section id="libraryView" class="view"></section>
+      <section id="profileView" class="view"></section>
+    </main>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn active" data-view="castleView">🏰<span>Замок</span></button>
+      <button class="nav-btn" data-view="gazetteView">📰<span>Газета</span></button>
+      <button class="nav-btn" data-view="lessonsView">📅<span>Уроки</span></button>
+      <button class="nav-btn" data-view="libraryView">📖<span>Библиотека</span></button>
+      <button class="nav-btn" data-view="profileView">👤<span>Профиль</span></button>
+    </nav>
+
+    <dialog id="bookModal" class="book-modal">
+      <article id="bookInner"></article>
+      <button id="closeBook" class="btn">Закрыть книгу</button>
+    </dialog>
+
     <div class="bg-glow"></div>
     <main class="app-shell">
       <header class="app-header">
