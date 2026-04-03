@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hogwarts School App</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-glow"></div>
+    <main class="app-shell">
+      <header class="app-header">
+        <div>
+          <h1>Hogwarts School</h1>
+          <p class="subtitle">Магический кабинет школы • Telegram Web App</p>
+        </div>
+        <button id="openProfileBtn" class="ghost-btn">Профиль</button>
+      </header>
+
+      <section id="homeView" class="view active"></section>
+      <section id="rulesView" class="view"></section>
+      <section id="staffView" class="view"></section>
+      <section id="gazetteView" class="view"></section>
+      <section id="libraryView" class="view"></section>
+      <section id="lessonsView" class="view"></section>
+      <section id="quidditchView" class="view"></section>
+      <section id="profileView" class="view"></section>
+
+      <dialog id="bookDialog" class="book-dialog">
+        <article id="bookContent"></article>
+        <button id="closeBookBtn" class="close-book">Закрыть книгу</button>
+      </dialog>
+    </main>
+
+    <nav class="tabbar">
+      <button data-route="homeView" class="tab-btn active">Главная</button>
+      <button data-route="libraryView" class="tab-btn">Библиотека</button>
+      <button data-route="lessonsView" class="tab-btn">Уроки</button>
+      <button data-route="quidditchView" class="tab-btn">Квиддич</button>
+      <button data-route="gazetteView" class="tab-btn">Сплетник</button>
+    </nav>
+
+    <script src="app.js"></script>
+  </body>
+</html>
